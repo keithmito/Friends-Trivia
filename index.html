@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Friends Trivia</title>
+  <meta name="description" content="Live trivia for you and your friends. Make a room, share the code, answer on your phones." />
+  <meta name="theme-color" content="#191B4D" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='14' width='56' height='36' rx='6' fill='%23FFC83D' stroke='%23191B4D' stroke-width='4'/%3E%3Ctext x='32' y='42' font-family='Arial' font-weight='900' font-size='24' text-anchor='middle' fill='%23191B4D'%3E%3F%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="app">
+
+    <!-- Home -->
+    <section id="screen-home" class="screen">
+      <header class="brand">
+        <div class="plate plate-logo" aria-hidden="true"><span>TRIVIA</span></div>
+        <h1>Friends Trivia</h1>
+        <p class="lede">One person makes a room. Everyone else joins with the code and plays on their own phone.</p>
+      </header>
+
+      <div id="setup-warning" class="notice" hidden></div>
+
+      <label class="field">
+        <span>Your name</span>
+        <input id="name" maxlength="16" autocomplete="nickname" placeholder="e.g. Keith" />
+      </label>
+
+      <button id="btn-create" class="btn btn-primary">Create a room</button>
+
+      <div class="join-row">
+        <label class="field">
+          <span>Got a code?</span>
+          <input id="join-code" class="code-input" maxlength="4" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="ABCD" />
+        </label>
+        <button id="btn-join" class="btn btn-ghost">Join</button>
+      </div>
+    </section>
+
+    <!-- Lobby -->
+    <section id="screen-lobby" class="screen" hidden>
+      <div class="room-head">
+        <p class="small">Room code</p>
+        <div class="plate plate-room"><span id="lobby-code">----</span></div>
+        <div class="share-row">
+          <a id="btn-whatsapp" class="btn btn-small btn-whatsapp" target="_blank" rel="noopener">Share on WhatsApp</a>
+          <button id="btn-copy" class="btn btn-small btn-ghost">Copy link</button>
+        </div>
+      </div>
+
+      <h2 class="section-title">Players <span id="player-count" class="count"></span></h2>
+      <ul id="lobby-players" class="player-list"></ul>
+
+      <div id="host-settings" hidden>
+        <h2 class="section-title">Questions</h2>
+        <div class="tabs" role="tablist">
+          <button role="tab" id="tab-category" class="tab" aria-selected="true">Pick a category</button>
+          <button role="tab" id="tab-custom" class="tab" aria-selected="false">Describe your own</button>
+        </div>
+
+        <div id="panel-category">
+          <div id="category-grid" class="chip-grid"></div>
+        </div>
+
+        <div id="panel-custom" hidden>
+          <label class="field">
+            <span>What should the questions be about?</span>
+            <textarea id="custom-topic" rows="2" maxlength="120" placeholder="e.g. Kenyan music from the 2000s"></textarea>
+          </label>
+          <div id="topic-ideas" class="idea-row"></div>
+          <p id="ai-off" class="small muted" hidden>Custom topics need a Gemini key on the server. The setup guide in the README shows how to add one.</p>
+        </div>
+
+        <div class="settings-grid">
+          <label class="field">
+            <span>How many</span>
+            <select id="set-amount">
+              <option value="5">5 questions</option>
+              <option value="10" selected>10 questions</option>
+              <option value="15">15 questions</option>
+              <option value="20">20 questions</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Time per question</span>
+            <select id="set-time">
+              <option value="10">10 seconds</option>
+              <option value="15">15 seconds</option>
+              <option value="20" selected>20 seconds</option>
+              <option value="30">30 seconds</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Difficulty</span>
+            <select id="set-difficulty">
+              <option value="mixed" selected>Mixed</option>
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </label>
+        </div>
+
+        <button id="btn-start" class="btn btn-primary">Start game</button>
+      </div>
+
+      <div id="guest-wait" class="wait-card" hidden>
+        <p id="guest-wait-text">Waiting for the host to start…</p>
+        <p id="guest-settings" class="small muted"></p>
+      </div>
+
+      <button class="btn btn-text btn-leave">Leave room</button>
+    </section>
+
+    <!-- Loading -->
+    <section id="screen-loading" class="screen center" hidden>
+      <div class="spinner" aria-hidden="true"></div>
+      <p id="loading-text" class="big-line">Getting questions…</p>
+    </section>
+
+    <!-- Question + reveal -->
+    <section id="screen-question" class="screen" hidden>
+      <div class="q-top">
+        <span id="q-counter" class="small"></span>
+        <span id="q-category" class="small muted"></span>
+      </div>
+      <div class="timer" aria-hidden="true"><div id="timer-fill" class="timer-fill"></div></div>
+      <div class="q-row">
+        <h2 id="q-text" class="q-text"></h2>
+        <div id="timer-num" class="timer-num" aria-live="off"></div>
+      </div>
+      <div id="answers" class="answers"></div>
+      <div id="q-status" class="q-status" aria-live="polite"></div>
+      <div id="reveal-box" class="reveal-box" hidden>
+        <p id="reveal-result" class="reveal-result"></p>
+        <p id="reveal-fact" class="small"></p>
+      </div>
+      <button id="btn-host-next" class="btn btn-ghost" hidden>Next</button>
+    </section>
+
+    <!-- Leaderboard between questions -->
+    <section id="screen-board" class="screen" hidden>
+      <h2 class="section-title">Scores after <span id="board-round"></span></h2>
+      <ol id="board-list" class="board"></ol>
+      <p id="board-next" class="small muted"></p>
+      <button id="btn-host-next-2" class="btn btn-ghost" hidden>Next question</button>
+    </section>
+
+    <!-- Final -->
+    <section id="screen-final" class="screen" hidden>
+      <h2 class="final-title">Final scores</h2>
+      <div id="podium" class="podium"></div>
+      <ol id="final-list" class="board"></ol>
+      <button id="btn-again" class="btn btn-primary" hidden>Play again</button>
+      <p id="final-wait" class="small muted" hidden>The host can start another round.</p>
+      <button class="btn btn-text btn-leave">Leave room</button>
+    </section>
+
+    <div id="host-gone" class="banner" hidden>The host lost connection. Waiting for them to come back…</div>
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  </main>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>
