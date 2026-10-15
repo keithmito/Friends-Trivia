@@ -13,6 +13,10 @@
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
+  <button id="btn-mute" class="mute" aria-label="Turn sound off" aria-pressed="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path class="spk" d="M4 9h4l5-4v14l-5-4H4z"/><path class="on" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/><path class="off" d="M16 9l6 6M22 9l-6 6"/></svg>
+  </button>
+
   <main class="app">
 
     <!-- Home -->
@@ -39,6 +43,8 @@
         </label>
         <button id="btn-join" class="btn btn-ghost">Join</button>
       </div>
+
+      <button class="btn btn-text btn-season" hidden>Season leaderboard</button>
     </section>
 
     <!-- Lobby -->
@@ -55,11 +61,22 @@
       <h2 class="section-title">Players <span id="player-count" class="count"></span></h2>
       <ul id="lobby-players" class="player-list"></ul>
 
+      <!-- Shown to everyone when the host picks "Everyone picks" -->
+      <div id="my-topic" class="topic-card" hidden>
+        <label class="field">
+          <span>Your topic for this game</span>
+          <input id="my-topic-input" maxlength="80" placeholder="e.g. Afrobeats, Formula 1, Kenyan history" />
+        </label>
+        <button id="btn-save-topic" class="btn btn-small btn-ghost">Save my topic</button>
+        <p id="my-topic-status" class="small muted"></p>
+      </div>
+
       <div id="host-settings" hidden>
         <h2 class="section-title">Questions</h2>
         <div class="tabs" role="tablist">
-          <button role="tab" id="tab-category" class="tab" aria-selected="true">Pick a category</button>
-          <button role="tab" id="tab-custom" class="tab" aria-selected="false">Describe your own</button>
+          <button role="tab" id="tab-category" class="tab" aria-selected="true">Category</button>
+          <button role="tab" id="tab-custom" class="tab" aria-selected="false">Describe one</button>
+          <button role="tab" id="tab-everyone" class="tab" aria-selected="false">Everyone picks</button>
         </div>
 
         <div id="panel-category">
@@ -72,8 +89,14 @@
             <textarea id="custom-topic" rows="2" maxlength="120" placeholder="e.g. Kenyan music from the 2000s"></textarea>
           </label>
           <div id="topic-ideas" class="idea-row"></div>
-          <p id="ai-off" class="small muted" hidden>Custom topics need a Gemini key on the server. The setup guide in the README shows how to add one.</p>
         </div>
+
+        <div id="panel-everyone" hidden>
+          <p class="small">Each player types a topic in the box above the settings. The questions get mixed from all of them, and you'll see whose pick each one came from.</p>
+          <p id="everyone-count" class="small muted"></p>
+        </div>
+
+        <p id="ai-off" class="small muted" hidden>Custom topics need a Gemini key on the server. The setup guide in the README shows how to add one.</p>
 
         <div class="settings-grid">
           <label class="field">
@@ -152,15 +175,35 @@
 
     <!-- Final -->
     <section id="screen-final" class="screen" hidden>
-      <h2 class="final-title">Final scores</h2>
-      <div id="podium" class="podium"></div>
-      <ol id="final-list" class="board"></ol>
-      <button id="btn-again" class="btn btn-primary" hidden>Play again</button>
-      <p id="final-wait" class="small muted" hidden>The host can start another round.</p>
-      <button class="btn btn-text btn-leave">Leave room</button>
+      <div id="drumroll" class="drumroll" hidden>
+        <p>And the winner is…</p>
+      </div>
+      <div id="final-body">
+        <h2 class="final-title">Final scores</h2>
+        <div id="podium" class="podium"></div>
+        <ol id="final-list" class="board"></ol>
+        <p id="season-note" class="small muted center-text" hidden></p>
+        <button id="btn-again" class="btn btn-primary" hidden>Play again</button>
+        <p id="final-wait" class="small muted center-text" hidden>The host can start another round.</p>
+        <button class="btn btn-ghost btn-season" hidden>Season leaderboard</button>
+        <button class="btn btn-text btn-leave">Leave room</button>
+      </div>
     </section>
 
-    <div id="host-gone" class="banner" hidden>The host lost connection. Waiting for them to come back…</div>
+    <!-- Season leaderboard -->
+    <section id="screen-season" class="screen" hidden>
+      <h2 class="final-title">Season leaderboard</h2>
+      <div class="tabs tabs-2" role="tablist">
+        <button role="tab" id="tab-month" class="tab" aria-selected="true">This month</button>
+        <button role="tab" id="tab-all" class="tab" aria-selected="false">All time</button>
+      </div>
+      <ol id="season-list" class="board"></ol>
+      <p id="season-empty" class="small muted center-text" hidden></p>
+      <p class="small muted center-text">Ranked by wins, then total points. Games need at least 2 players to count.</p>
+      <button id="btn-season-back" class="btn btn-ghost">Back</button>
+    </section>
+
+    <div id="host-gone" class="banner" hidden>The host lost connection. Switching to a new host…</div>
     <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
   </main>
 
