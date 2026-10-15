@@ -38,6 +38,10 @@ const HOST_STALE_MS = 8000;      // no word from the host for this long = host i
 const HOST_GONE_GRACE_MS = 5000; // host missing for this long = pick a new host
 const REJOIN_MS = 6 * 3600e3;    // how long a phone remembers which room it was in
 const DRUMROLL_MS = 2300;
+// The address used in WhatsApp invites and copied links.
+const SITE_URL = 'https://mitofriends-trivia.vercel.app';
+// When testing on your own computer, share the local address instead.
+const shareBase = () => (/^(localhost|127\.|192\.168\.|10\.)/.test(location.hostname) ? location.origin : SITE_URL);
 
 // ---------- small helpers ----------
 const $ = (s) => document.querySelector(s);
@@ -950,7 +954,7 @@ function renderLobby(s) {
   myAnswer = null;
   renderedQ = -1;
   $('#lobby-code').textContent = s.code;
-  const link = `${location.origin}/?room=${s.code}`;
+  const link = `${shareBase()}/?room=${s.code}`;
   $('#btn-whatsapp').href = `https://wa.me/?text=${encodeURIComponent(`Join The Friends Trivia, Tuonene nani 🐐! Room code ${s.code}: ${link}`)}`;
   const online = s.players.filter((p) => p.online);
   const everyone = s.settings?.source === 'everyone';
@@ -1220,7 +1224,7 @@ function closeSeason() {
 }
 
 async function copyLink() {
-  const link = `${location.origin}/?room=${roomCode}`;
+  const link = `${shareBase()}/?room=${roomCode}`;
   try {
     await navigator.clipboard.writeText(link);
     toast('Link copied. Paste it to your friends.');
