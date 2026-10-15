@@ -18,6 +18,7 @@ Live trivia for you and your friends, played on your own phones.
 | Part | What it does |
 | --- | --- |
 | `index.html`, `styles.css`, `js/` | The game itself (plain HTML/JS, no build step) |
+| `fonts/` | Bricolage Grotesque, hosted here so it loads with the page (SIL Open Font License, see `fonts/OFL.txt`) |
 | `api/config.js` | Gives the browser the public Supabase settings |
 | `api/questions.js` | Gets preset-category questions from [Open Trivia DB](https://opentdb.com) (free, no key) |
 | `api/generate.js` | Writes custom-topic questions with Google Gemini (key stays on the server) |

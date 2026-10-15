@@ -7,9 +7,45 @@
   <meta name="description" content="Live trivia for you and your friends. Make a room, share the code, answer on your phones." />
   <meta name="theme-color" content="#191B4D" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='14' width='56' height='36' rx='6' fill='%23FFC83D' stroke='%23191B4D' stroke-width='4'/%3E%3Ctext x='32' y='42' font-family='Arial' font-weight='900' font-size='24' text-anchor='middle' fill='%23191B4D'%3E%3F%3C/text%3E%3C/svg%3E" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wdth,wght@75..100,400..800&display=swap" rel="stylesheet" />
+  <!-- Font is hosted here (not Google) and fetched first, so text never jumps from a backup font. -->
+  <link rel="preload" href="/fonts/bricolage-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <style>
+    @font-face {
+      font-family: 'Bricolage Grotesque';
+      font-style: normal;
+      font-display: swap;
+      font-weight: 200 800;
+      font-stretch: 75% 100%;
+      src: url(/fonts/bricolage-latin.woff2) format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: 'Bricolage Grotesque';
+      font-style: normal;
+      font-display: swap;
+      font-weight: 200 800;
+      font-stretch: 75% 100%;
+      src: url(/fonts/bricolage-latin-ext.woff2) format('woff2');
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    html { background: #191b4d; }
+    html.fonts-pending body { opacity: 0; }
+    body { transition: opacity 0.18s ease; }
+  </style>
+  <script>
+    // Show the page once the font is ready (at most 1.2s), so it appears once instead of popping.
+    (function () {
+      var root = document.documentElement;
+      if (!document.fonts || !document.fonts.load) return;
+      root.classList.add('fonts-pending');
+      var show = function () { root.classList.remove('fonts-pending'); };
+      setTimeout(show, 1200);
+      Promise.all([
+        document.fonts.load('400 1em "Bricolage Grotesque"'),
+        document.fonts.load('800 1em "Bricolage Grotesque"')
+      ]).then(show, show);
+    })();
+  </script>
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
