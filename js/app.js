@@ -951,7 +951,7 @@ function renderLobby(s) {
   renderedQ = -1;
   $('#lobby-code').textContent = s.code;
   const link = `${location.origin}/?room=${s.code}`;
-  $('#btn-whatsapp').href = `https://wa.me/?text=${encodeURIComponent(`Join my trivia game! Room code ${s.code}: ${link}`)}`;
+  $('#btn-whatsapp').href = `https://wa.me/?text=${encodeURIComponent(`Join my MITO Friends Trivia game! Room code ${s.code}: ${link}`)}`;
   const online = s.players.filter((p) => p.online);
   const everyone = s.settings?.source === 'everyone';
   $('#player-count').textContent = String(online.length);
