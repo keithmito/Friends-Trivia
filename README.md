@@ -1,4 +1,4 @@
-# MITO Friends Trivia
+# Friends Trivia
 
 Live trivia for you and your friends, played on your own phones.
 
