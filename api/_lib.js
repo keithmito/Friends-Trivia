@@ -67,7 +67,12 @@ export function verifyTicket(ticket, now = Date.now()) {
 
 // ---------- Supabase (server only, secret key) ----------
 export async function db(path, { method = 'GET', body, prefer } = {}) {
-  const headers = { apikey: SERVICE_KEY(), 'content-type': 'application/json' };
+  const key = SERVICE_KEY();
+  const headers = { apikey: key, 'content-type': 'application/json' };
+  // Legacy service_role keys are JWTs and must also be sent as a Bearer token,
+  // otherwise Supabase treats the request as a public visitor.
+  // New sb_secret_ keys go in the apikey header only.
+  if (key.startsWith('eyJ')) headers.authorization = `Bearer ${key}`;
   if (prefer) headers.prefer = prefer;
   const r = await fetch(`${SUPABASE_URL()}/rest/v1/${path}`, {
     method,

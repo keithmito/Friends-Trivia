@@ -191,3 +191,17 @@ test('questions: decodes Open Trivia DB results', async () => {
   assert.equal(q.text, 'Where is "Lake Turkana"?');
   assert.equal(q.options[q.answer], 'Kenya');
 });
+
+test('db: legacy JWT service keys are also sent as Bearer, sb_secret keys are not', async () => {
+  const { db } = await import('../api/_lib.js');
+  process.env.SUPABASE_URL = 'https://db.supabase.co';
+  let seen;
+  globalThis.fetch = async (url, opts) => { seen = opts.headers; return { ok: true, text: async () => 'true' }; };
+  process.env.SUPABASE_SERVICE_ROLE_KEY = 'eyJhbGciOi.legacy.jwt';
+  await db('rpc/x', { method: 'POST', body: {} });
+  assert.equal(seen.authorization, 'Bearer eyJhbGciOi.legacy.jwt');
+  process.env.SUPABASE_SERVICE_ROLE_KEY = 'sb_secret_abc';
+  await db('rpc/x', { method: 'POST', body: {} });
+  assert.equal(seen.authorization, undefined);
+  assert.equal(seen.apikey, 'sb_secret_abc');
+});
