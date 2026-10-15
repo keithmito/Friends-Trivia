@@ -134,6 +134,7 @@ let lastOnlineCount = 0;
 let viewingSeason = false;
 let seasonPeriod = 'month';
 let wakeLock = null;
+let lastRendered = '';  // last snapshot drawn, so identical heartbeats don't redraw the screen
 
 // ---------- boot ----------
 init();
@@ -404,7 +405,7 @@ function leaveRoom() {
   if (channel) {
     // Hand the game over instead of freezing everyone.
     if (isHost && host && host.online.some((id) => id !== me.id)) {
-      channel.send({ type: 'broadcast', event: 'backup', payload: backupOf(host) });
+      channel.send({ type: 'broadcast', event: 'backup', payload: clone(host) });
       channel.send({ type: 'broadcast', event: 'leaving', payload: { id: me.id } });
     }
     channel.untrack().catch(() => {});
@@ -414,7 +415,7 @@ function leaveRoom() {
   if (isHost) store.del('ft-host', sessionStorage);
   letSleep();
   channel = null; roomCode = null; isHost = false; host = null; view = null; backup = null;
-  myAnswer = null; renderedQ = -1; missingSince = 0; viewingSeason = false;
+  myAnswer = null; renderedQ = -1; missingSince = 0; viewingSeason = false; lastRendered = '';
   me.id = '';
   store.del('ft-id', sessionStorage);
   $('#host-gone').hidden = true;
@@ -454,7 +455,7 @@ function roomLoop() {
   if (isHost) {
     // Heartbeat: re-send the state so everyone knows the host is alive;
     // every few beats also send a full backup for a possible takeover.
-    if (loopCount % (HEARTBEAT_MS / 1000) === 0) hostBroadcast({ backup: loopCount % 6 === 0 });
+    if (loopCount % (HEARTBEAT_MS / 1000) === 0) hostBroadcast({ backup: loopCount % 6 === 0, save: false });
   } else {
     checkHost();
   }
@@ -682,17 +683,14 @@ function snapshot() {
   };
 }
 
-function backupOf(h) {
-  return clone(h);
-}
-
-function hostBroadcast({ backup: withBackup = true } = {}) {
+function hostBroadcast({ backup: withBackup = true, save = true } = {}) {
   if (!isHost || !host) return;
-  store.set('ft-host', JSON.stringify(host), sessionStorage);
+  // Saved so a host who refreshes can carry on; heartbeats change nothing, so they skip it.
+  if (save) store.set('ft-host', JSON.stringify(host), sessionStorage);
   const snap = snapshot();
   if (channel) {
     channel.send({ type: 'broadcast', event: 'state', payload: snap });
-    if (withBackup) channel.send({ type: 'broadcast', event: 'backup', payload: backupOf(host) });
+    if (withBackup) channel.send({ type: 'broadcast', event: 'backup', payload: clone(host) });
   }
   applySnapshot(snap);
 }
@@ -918,6 +916,11 @@ function applySnapshot(s) {
     if (s.phase === 'lobby' || s.phase === 'final') return;
     viewingSeason = false;
   }
+  // Heartbeats often repeat the same state: skip the redraw unless something changed.
+  // (Questions still go through, so the countdown can re-sync.)
+  const signature = JSON.stringify({ ...s, remainingMs: 0 });
+  if (signature === lastRendered && s.phase !== 'question') return;
+  lastRendered = signature;
   if (s.phase !== 'question') stopTimer();
   switch (s.phase) {
     case 'lobby': renderLobby(s); break;
@@ -1219,6 +1222,7 @@ async function openSeason(period = seasonPeriod) {
 
 function closeSeason() {
   viewingSeason = false;
+  lastRendered = '';
   if (view && roomCode) applySnapshot(view);
   else show('home');
 }

@@ -226,10 +226,9 @@ input:disabled, textarea:disabled { opacity: 0.5; }
   width: 100%; display: grid; place-items: center;
   border-radius: 12px 12px 4px 4px; font-weight: 800; font-size: 2rem; color: var(--ink);
 }
-.step-1 .step-block { height: 150px; background: var(--sun); }
+.step-1 .step-block { height: 150px; background: var(--sun); animation: rise 0.7s cubic-bezier(.2,.9,.3,1.3) both; transform-origin: bottom; }
 .step-2 .step-block { height: 110px; background: var(--sky); }
 .step-3 .step-block { height: 80px; background: var(--pink); }
-.step-1 .step-block { animation: rise 0.7s cubic-bezier(.2,.9,.3,1.3) both; transform-origin: bottom; }
 
 /* ---------- everyone picks ---------- */
 .topic-card {

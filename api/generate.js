@@ -36,7 +36,7 @@ const SCHEMA = {
   required: ['questions'],
 };
 
-export function cleanTopics(body) {
+function cleanTopics(body) {
   const raw = Array.isArray(body.topics) ? body.topics : [body.topic];
   const seen = new Set();
   const topics = [];

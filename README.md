@@ -24,7 +24,7 @@ Live trivia for you and your friends, played on your own phones.
 | `api/room.js` | Gives each new room a signed ticket |
 | `api/results.js`, `api/leaderboard.js` | Save finished games and read the season table |
 | `supabase/setup.sql` | One-time database setup for limits, the question cache and the leaderboard |
-| Supabase Realtime | Connects everyone's phones in a room. No database tables needed. |
+| Supabase Realtime | Connects everyone's phones in a room |
 
 The host's phone runs the game: it keeps the questions and the scores, and tells everyone else what to show. It also sends a backup copy to the other phones every few seconds, so if the host disappears, the player next in line takes over from where things were. If the host was in the middle of a question, that question restarts.
 
